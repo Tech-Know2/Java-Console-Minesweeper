@@ -1,17 +1,38 @@
 import java.util.Arrays;
+import java.util.ArrayList;
 
 public class MineSweeper 
 {
-    public boolean[][] mineMap = new boolean[5][5];
-    public char[][] displayMap = new char[5][5];
+    public boolean[][] mineMap = new boolean[3][3];
+    public char[][] displayMap = new char[3][3];
 
-    public int totalMines = 10;
+    ArrayList<int[]> radius = new ArrayList<int[]>();
+
+    public int totalMines = 4;
     public int minesFound = 0;
     public int flagsPlaced = 0;
     public boolean stillAlive = true;
 
     public MineSweeper() {
         SetUpDisplay();
+    }
+
+    public boolean checkWinStatus()
+    {
+      for(int r = 0; r < mineMap.length; r++)
+      {
+        for(int c = 0; c < mineMap[r].length; c++)
+        {
+          if(mineMap[r][c] != true && displayMap[r][c] == 'F')
+          {
+            stillAlive = false;
+
+            return false;
+          }
+        }
+      }
+
+      return false;
     }
 
     public void SetUpDisplay() {
@@ -64,6 +85,7 @@ public class MineSweeper
     }
 
     public void SetUpMines(int row, int col) {
+        
         for (int i = 0; i < totalMines; ) {
             int randomRow = (int) (Math.random() * mineMap.length);
             int randomCol = (int) (Math.random() * mineMap.length);
@@ -94,48 +116,71 @@ public class MineSweeper
                 stillAlive = false;
             }
         }
+
+        if(minesFound >= totalMines)
+        {
+          if(checkWinStatus() == true)
+          {
+            System.out.println("Congrats you won the game, well done");
+          }
+        }
     }
 
     public boolean hasPlayedThere(int row, int col) {
         return displayMap[row][col] != '?';
     }
 
-    public void UpdateDisplays(int row, int col) {
-        revealCell(row, col);
-    }
+    public void UpdateDisplays(int row, int col) 
+    {
+        radius.clear();
+    
+        int num = GetSpotValue(row, col);
+    
+        for (int i = 0; i < radius.size(); i++)  //Do radius.size() for all or specific value for only a set amount
+        {
+            int[] spot = radius.get(i);
+            int r = spot[0];
+            int c = spot[1];
+    
+            // Get the value for the empty spot and update the displayMap
+            int emptyCellValue = GetSpotValue(r, c);
+            char display;
 
-    private void revealCell(int row, int col) {
-        if (row < 0 || row >= mineMap.length || col < 0 || col >= mineMap[0].length)
-            return; // Out of bounds
-    
-        if (displayMap[row][col] != '?')
-            return; // Cell already revealed
-    
-        int[] spotValue = GetSpotValue(row, col);
-        displayMap[row][col] = (char) (spotValue[2] + '0');
-    
-        if (spotValue[2] == 0) {
-            // Recursively reveal neighboring cells
-            for (int r = row - 1; r <= row + 1; r++) {
-                for (int c = col - 1; c <= col + 1; c++) {
-                    if (!(r == row && c == col)) { // Exclude the current cell
-                        revealCell(r, c);
-                    }
-                }
+            if(emptyCellValue == 0)
+            {
+              display = '-';
+            } else 
+            {
+              display = (char) (emptyCellValue + '0');
             }
+          
+            displayMap[r][c] = display;
         }
     }
 
-    public int[] GetSpotValue(int row, int col) {
+
+    public int GetSpotValue(int row, int col) {
       int[] num = {0, 0, 0};
       int count = 0;
+
+      int[] radiusSpots = new int[2];
   
-      for (int r = row - 1; r <= row + 1; r++) {
-          for (int c = col - 1; c <= col + 1; c++) {
-              if (r != row || c != col) { // Exclude the current cell
-                  if (r >= 0 && r < mineMap.length && c >= 0 && c < mineMap[0].length) {
-                      if (mineMap[r][c]) {
+      for (int r = row - 1; r <= row + 1; r++) 
+      {
+          for (int c = col - 1; c <= col + 1; c++) 
+          {
+              if (r != row || c != col) 
+              {
+                  if (r >= 0 && r < mineMap.length && c >= 0 && c < mineMap[0].length) 
+                  {
+                      if (mineMap[r][c]) 
+                      {
                           count++;
+                      } else if(!mineMap[r][c] && containsValueAtIndexZero(radius, r, c) == false && radius.size() < (totalMines * 2))
+                      {
+                        radiusSpots[0] = r;
+                        radiusSpots[1] = c;
+                        radius.add(radiusSpots);
                       }
                   }
               }
@@ -143,9 +188,33 @@ public class MineSweeper
       }
   
       num[2] = count;
-      return num;
+
+      char display;
+
+      if(count == 0)
+      {
+          display = '-';
+      } else 
+      {
+         display = (char) (count + '0');
+      }
+          
+      displayMap[row][col] = display;
+      
+      return count;
   }
 
+  public boolean containsValueAtIndexZero(ArrayList<int[]> intArrayAL, int targetValueOne, int targetValueTwo) 
+  {
+   for (int[] arr : intArrayAL) 
+   {
+    if (arr.length > 0 && arr[0] == targetValueOne && arr[1] == targetValueTwo) 
+    {
+     return true;
+    }
+   }
+   return false;
+  }
 
     public void PlaceFlag(int row, int col) {
         displayMap[row][col] = 'F';
