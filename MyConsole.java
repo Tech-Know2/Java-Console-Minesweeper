@@ -13,6 +13,7 @@ public class MyConsole {
     System.out.println("Happy Hunting!");
 
     MineSweeper mineSweeper = new MineSweeper();
+    boolean firstTime = true;
     
     while(mineSweeper.minesFound < mineSweeper.totalMines && mineSweeper.stillAlive == true)
     {
@@ -27,7 +28,8 @@ public class MyConsole {
 
       if(mineSweeper.hasPlayedThere(row,col) != true)
       {
-        mineSweeper.MakeMove(action, row, col);
+        mineSweeper.MakeMove(firstTime, action, row, col);
+        firstTime = false;
        
         if(mineSweeper.stillAlive == true)
         {
