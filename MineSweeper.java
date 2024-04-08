@@ -3,12 +3,12 @@ import java.util.ArrayList;
 
 public class MineSweeper 
 {
-    public boolean[][] mineMap = new boolean[3][3];
-    public char[][] displayMap = new char[3][3];
+    public boolean[][] mineMap = new boolean[10][10];
+    public char[][] displayMap = new char[10][10];
 
     ArrayList<int[]> radius = new ArrayList<int[]>();
 
-    public int totalMines = 4;
+    public int totalMines = 30;
     public int minesFound = 0;
     public int flagsPlaced = 0;
     public boolean stillAlive = true;
